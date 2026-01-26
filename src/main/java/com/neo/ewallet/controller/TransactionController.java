@@ -1,5 +1,8 @@
 package com.neo.ewallet.controller;
 
+import com.neo.ewallet.dto.Result;
+import com.neo.ewallet.dto.TransactionRequest;
+import com.neo.ewallet.dto.TransactionResponse;
 import com.neo.ewallet.service.EWalletService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,22 +17,18 @@ import java.util.Map;
 @RequestMapping("/api/transactions")
 public class TransactionController {
 
-    private final EWalletService wallet;
+    private final EWalletService eWalletService;
 
     public TransactionController(EWalletService wallet) {
-        this.wallet = wallet;
+        this.eWalletService = wallet;
     }
 
-    public record Req(long user_id, BigDecimal amount) {}
 
     @PostMapping("/credit")
-    public ResponseEntity<?> credit(@RequestBody Req req) {
+    public ResponseEntity<?> credit(@RequestBody TransactionRequest req) {
         try {
-            var res = wallet.credit(req.user_id(), req.amount());
-            return ResponseEntity.ok(Map.of(
-                    "status", "success",
-                    "transaction_id", res.transactionId(),
-                    "new_balance", res.newBalance()
+            Result res = eWalletService.credit(req.getUser_id(), req.getAmount());
+            return ResponseEntity.ok(new TransactionResponse("success", res.getTransactionId(), res.getNewBalance()
             ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("status", "error", "message", e.getMessage()));
@@ -37,16 +36,13 @@ public class TransactionController {
     }
 
     @PostMapping("/debit")
-    public ResponseEntity<?> debit(@RequestBody Req req) {
+    public ResponseEntity<?> debit(@RequestBody TransactionRequest req) {
         try {
-            var res = wallet.debit(req.user_id(), req.amount());
-            if ("error".equals(res.status())) {
-                return ResponseEntity.badRequest().body(Map.of("status", "error", "message", res.message()));
+            Result res = eWalletService.debit(req.getUser_id(), req.getAmount());
+            if ("error".equals(res.getStatus())) {
+                return ResponseEntity.badRequest().body(Map.of("status", "error", "message", res.getMessage()));
             }
-            return ResponseEntity.ok(Map.of(
-                    "status", "success",
-                    "transaction_id", res.transactionId(),
-                    "new_balance", res.newBalance()
+            return ResponseEntity.ok(new TransactionResponse("success", res.getTransactionId(), res.getNewBalance()
             ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("status", "error", "message", e.getMessage()));

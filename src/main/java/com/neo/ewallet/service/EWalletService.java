@@ -1,11 +1,11 @@
 package com.neo.ewallet.service;
 
+import com.neo.ewallet.dto.Result;
 import com.neo.ewallet.model.Transactions;
 import com.neo.ewallet.model.User;
 import com.neo.ewallet.repository.TransactionRepository;
 import com.neo.ewallet.repository.UserRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transaction;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,5 +73,4 @@ public class EWalletService {
         }
     }
 
-    public record Result(String status, Long transactionId, BigDecimal newBalance, String message) {}
 }
