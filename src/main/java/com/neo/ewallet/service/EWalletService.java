@@ -33,7 +33,7 @@ public class EWalletService {
     public Result credit(long userId, BigDecimal amount) {
         validateAmount(amount);
 
-        BigDecimal newBalance = userRepo.creditAndReturnBalance(userId, amount);
+        BigDecimal newBalance = creditAndReturnBalance(userId, amount);
         if (newBalance == null) throw new IllegalArgumentException("User not found");
 
         Transactions tx = new Transactions();
@@ -50,7 +50,7 @@ public class EWalletService {
     public Result debit(long userId, BigDecimal amount) {
         validateAmount(amount);
 
-        BigDecimal newBalance = userRepo.debitIfSufficientAndReturnBalance(userId, amount);
+        BigDecimal newBalance = debitAndReturnBalance(userId, amount);
         if (newBalance == null) {
             // bisa: user not found atau insufficient funds. biasanya cek user exist dulu biar message tepat.
             log.warn("DEBIT failed userId={} amount={} reason=insufficient_or_user_missing", userId, amount);
@@ -72,5 +72,35 @@ public class EWalletService {
             throw new IllegalArgumentException("Invalid amount");
         }
     }
+
+    private BigDecimal creditAndReturnBalance(long userId, BigDecimal amount) {
+        return (BigDecimal) em.createNativeQuery("""
+            UPDATE users
+            SET balance = balance + :amount
+            WHERE id = :userId
+            RETURNING balance
+        """)
+                .setParameter("userId", userId)
+                .setParameter("amount", amount)
+                .getSingleResult();
+    }
+
+    @Transactional
+    public BigDecimal debitAndReturnBalance(long userId, BigDecimal amount) {
+
+        Object result = em.createNativeQuery("""
+        UPDATE users
+        SET balance = balance - :amount
+        WHERE id = :userId
+          AND balance >= :amount
+        RETURNING balance
+    """)
+                .setParameter("userId", userId)
+                .setParameter("amount", amount)
+                .getSingleResult();
+
+        return (BigDecimal) result;
+    }
+
 
 }
