@@ -40,6 +40,12 @@ public class TransactionController {
     public ResponseEntity<?> debit(@RequestBody TransactionRequest req) {
         Result res = eWalletService.debit(req.getUser_id(), req.getAmount());
 
+        if ("error".equals(res.getStatus())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(TransactionResponse.error(res.getMessage()));
+        }
+
         return ResponseEntity.ok(
                 TransactionResponse.success(
                         res.getTransactionId(),
