@@ -87,20 +87,22 @@ public class EWalletService {
 
     @Transactional
     public BigDecimal debitAndReturnBalance(long userId, BigDecimal amount) {
-
-        Object result = em.createNativeQuery("""
-        UPDATE users
-        SET balance = balance - :amount
-        WHERE id = :userId
-          AND balance >= :amount
-        RETURNING balance
-    """)
-                .setParameter("userId", userId)
-                .setParameter("amount", amount)
-                .getSingleResult();
-
-        return (BigDecimal) result;
+        try {
+            return (BigDecimal) em.createNativeQuery("""
+            UPDATE users
+            SET balance = balance - :amount
+            WHERE id = :userId
+              AND balance >= :amount
+            RETURNING balance
+        """)
+                    .setParameter("userId", userId)
+                    .setParameter("amount", amount)
+                    .getSingleResult();
+        } catch (jakarta.persistence.NoResultException e) {
+            return null;
+        }
     }
+
 
 
 }
