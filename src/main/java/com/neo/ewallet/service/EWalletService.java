@@ -17,15 +17,12 @@ import java.math.BigDecimal;
 public class EWalletService {
 
     private static final Logger log = LoggerFactory.getLogger(EWalletService.class);
-
-    private final UserRepository userRepo;
-    private final TransactionRepository txRepo;
+    private final TransactionRepository transactionRepository;
     private final EntityManager em;
 
 
-    public EWalletService(UserRepository userRepo, TransactionRepository txRepo, EntityManager em) {
-        this.userRepo = userRepo;
-        this.txRepo = txRepo;
+    public EWalletService(TransactionRepository transactionRepository, EntityManager em) {
+        this.transactionRepository = transactionRepository;
         this.em = em;
     }
 
@@ -36,14 +33,14 @@ public class EWalletService {
         BigDecimal newBalance = creditAndReturnBalance(userId, amount);
         if (newBalance == null) throw new IllegalArgumentException("User not found");
 
-        Transactions tx = new Transactions();
-        tx.setUser(em.getReference(User.class, userId));
-        tx.setAmount(amount);
-        tx.setType("credit");
-        txRepo.save(tx);
+        Transactions transactions = new Transactions();
+        transactions.setUser(em.getReference(User.class, userId));
+        transactions.setAmount(amount);
+        transactions.setType("credit");
+        transactionRepository.save(transactions);
 
-        log.info("CREDIT userId={} amount={} newBalance={} txId={}", userId, amount, newBalance, tx.getId());
-        return new Result("success", tx.getId(), newBalance, null);
+        log.info("CREDIT userId={} amount={} newBalance={} txId={}", userId, amount, newBalance, transactions.getId());
+        return new Result("success", transactions.getId(), newBalance, null);
     }
 
     @Transactional
@@ -52,19 +49,18 @@ public class EWalletService {
 
         BigDecimal newBalance = debitAndReturnBalance(userId, amount);
         if (newBalance == null) {
-            // bisa: user not found atau insufficient funds. biasanya cek user exist dulu biar message tepat.
             log.warn("DEBIT failed userId={} amount={} reason=insufficient_or_user_missing", userId, amount);
             return new Result("error", null, null, "Insufficient funds");
         }
 
-        Transactions tx = new Transactions();
-        tx.setUser(em.getReference(User.class, userId));
-        tx.setAmount(amount);
-        tx.setType("debit");
-        txRepo.save(tx);
+        Transactions transactions = new Transactions();
+        transactions.setUser(em.getReference(User.class, userId));
+        transactions.setAmount(amount);
+        transactions.setType("debit");
+        transactionRepository.save(transactions);
 
-        log.info("DEBIT userId={} amount={} newBalance={} txId={}", userId, amount, newBalance, tx.getId());
-        return new Result("success", tx.getId(), newBalance, null);
+        log.info("DEBIT userId={} amount={} newBalance={} txId={}", userId, amount, newBalance, transactions.getId());
+        return new Result("success", transactions.getId(), newBalance, null);
     }
 
     private void validateAmount(BigDecimal amount) {
