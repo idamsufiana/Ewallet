@@ -1,12 +1,14 @@
 package com.neo.ewallet.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
 @Table(name = "users")
+@Data
 public class User {
 
     @Id
