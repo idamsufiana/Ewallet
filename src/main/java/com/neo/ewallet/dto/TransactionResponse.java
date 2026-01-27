@@ -17,18 +17,16 @@ public class TransactionResponse {
         this.newBalance = newBalance;
     }
 
-    private TransactionResponse(String status, Long txId, BigDecimal balance, String message) {
-        this.status = status;
-        this.transactionId = txId;
-        this.newBalance = balance;
+    public TransactionResponse(String success, String message) {
+        this.status = success;
         this.message = message;
     }
 
     public static TransactionResponse success(Long txId, BigDecimal balance) {
-        return new TransactionResponse("success", txId, balance, null);
+        return new TransactionResponse("success", txId, balance);
     }
 
     public static TransactionResponse error(String message) {
-        return new TransactionResponse("error", null, null, message);
+        return new TransactionResponse("error", message);
     }
 }
