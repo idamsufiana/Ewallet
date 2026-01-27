@@ -1,7 +1,9 @@
 # Ewallet
 Ewallet system
 
-git clone 
+git clone https://github.com/idamsufiana/Ewallet.git
+
+
 mvn sprin boot:run
 
 please find result test below 
