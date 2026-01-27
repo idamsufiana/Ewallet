@@ -1,10 +1,12 @@
 package com.neo.ewallet.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionResponse {
     private String status;
     private Long transactionId;

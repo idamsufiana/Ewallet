@@ -17,6 +17,11 @@ import java.math.BigDecimal;
 public class EWalletService {
 
     private static final Logger log = LoggerFactory.getLogger(EWalletService.class);
+
+    private static final String CREDIT = "credit";
+    private static final String DEBIT  = "debit";
+    private static final String SUCCESS = "success";
+    private static final String ERROR  = "error";
     private final TransactionRepository transactionRepository;
     private final EntityManager em;
 
@@ -33,14 +38,10 @@ public class EWalletService {
         BigDecimal newBalance = creditAndReturnBalance(userId, amount);
         if (newBalance == null) throw new IllegalArgumentException("User not found");
 
-        Transactions transactions = new Transactions();
-        transactions.setUser(em.getReference(User.class, userId));
-        transactions.setAmount(amount);
-        transactions.setType("credit");
-        transactionRepository.save(transactions);
+        Transactions transaction = saveTransaction(userId, amount, CREDIT);
 
-        log.info("CREDIT userId={} amount={} newBalance={} txId={}", userId, amount, newBalance, transactions.getId());
-        return new Result("success", transactions.getId(), newBalance, null);
+        log.info("CREDIT userId={} amount={} newBalance={} txId={}", userId, amount, newBalance, transaction.getId());
+        return new Result(SUCCESS, transaction.getId(), newBalance, null);
     }
 
     @Transactional
@@ -50,17 +51,13 @@ public class EWalletService {
         BigDecimal newBalance = debitAndReturnBalance(userId, amount);
         if (newBalance == null) {
             log.warn("DEBIT failed userId={} amount={} reason=insufficient_or_user_missing", userId, amount);
-            return new Result("error", null, null, "Insufficient funds");
+            return new Result(ERROR, null, null, "Insufficient funds");
         }
+        Transactions transaction = saveTransaction(userId, amount, DEBIT);
 
-        Transactions transactions = new Transactions();
-        transactions.setUser(em.getReference(User.class, userId));
-        transactions.setAmount(amount);
-        transactions.setType("debit");
-        transactionRepository.save(transactions);
 
-        log.info("DEBIT userId={} amount={} newBalance={} txId={}", userId, amount, newBalance, transactions.getId());
-        return new Result("success", transactions.getId(), newBalance, null);
+        log.info("DEBIT userId={} amount={} newBalance={} txId={}", userId, amount, newBalance, transaction.getId());
+        return new Result(SUCCESS, transaction.getId(), newBalance, null);
     }
 
     private void validateAmount(BigDecimal amount) {
@@ -99,6 +96,17 @@ public class EWalletService {
         }
     }
 
+    private Transactions saveTransaction(long userId,
+                                         BigDecimal amount,
+                                         String type) {
+
+        Transactions transaction = new Transactions();
+        transaction.setUser(em.getReference(User.class, userId));
+        transaction.setAmount(amount);
+        transaction.setType(type);
+
+        return transactionRepository.save(transaction);
+    }
 
 
 }

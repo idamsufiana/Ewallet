@@ -27,7 +27,7 @@ public class TransactionController {
 
     @PostMapping("/credit")
     public ResponseEntity<?> credit(@RequestBody TransactionRequest req) {
-        Result res = eWalletService.credit(req.getUser_id(), req.getAmount());
+        Result res = eWalletService.credit(req.getUserId(), req.getAmount());
         return ResponseEntity.ok(
                 TransactionResponse.success(
                         res.getTransactionId(),
@@ -38,7 +38,7 @@ public class TransactionController {
 
     @PostMapping("/debit")
     public ResponseEntity<?> debit(@RequestBody TransactionRequest req) {
-        Result res = eWalletService.debit(req.getUser_id(), req.getAmount());
+        Result res = eWalletService.debit(req.getUserId(), req.getAmount());
 
         if ("error".equals(res.getStatus())) {
             return ResponseEntity

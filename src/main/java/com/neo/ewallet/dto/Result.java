@@ -11,10 +11,10 @@ public class Result {
     private BigDecimal newBalance;
     private String message;
 
-    public Result(String error, Long o, BigDecimal o1, String insufficientFunds) {
+    public Result(String error, Long transactionId, BigDecimal newBalance, String insufficientFunds) {
         this.status = error;
-        this.transactionId = o;
-        this.newBalance =o1;
+        this.transactionId = transactionId;
+        this.newBalance = newBalance;
         this.message = insufficientFunds;
     }
 }

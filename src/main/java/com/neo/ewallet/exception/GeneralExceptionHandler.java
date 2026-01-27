@@ -1,10 +1,8 @@
 package com.neo.ewallet.exception;
 
-import ch.qos.logback.classic.Logger;
-import com.neo.ewallet.dto.ApiError;
+
 import com.neo.ewallet.dto.TransactionResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
