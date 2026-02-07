@@ -1,5 +1,5 @@
 # Ewallet
-Ewallet system
+Ewallet service
 
 git clone https://github.com/idamsufiana/Ewallet.git
 
