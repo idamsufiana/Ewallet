@@ -1,9 +1,7 @@
-package com.neo.ewallet;
+package com.neo.ewallet.service;
 
 import com.neo.ewallet.model.User;
 import com.neo.ewallet.repository.UserRepository;
-import com.neo.ewallet.service.EWalletService;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +29,7 @@ class EWalletConcurrentTest {
     void setup() {
         User user = new User();
         user.setBalance(BigDecimal.ZERO);
-        user.setUsername("test-user");
+        user.setUsername("user4");
         user = userRepository.saveAndFlush(user);
         userId = user.getId();
     }
@@ -39,7 +37,7 @@ class EWalletConcurrentTest {
     @Test
     void concurrent_credit_should_be_atomic() throws Exception {
 
-        int threadCount = 100;
+        int threadCount = 1000;
         int txPerThread = 100;
         BigDecimal amount = BigDecimal.valueOf(1_000);
 

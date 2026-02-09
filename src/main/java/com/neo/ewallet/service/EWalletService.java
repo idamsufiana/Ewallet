@@ -6,6 +6,7 @@ import com.neo.ewallet.model.User;
 import com.neo.ewallet.repository.TransactionRepository;
 import com.neo.ewallet.repository.UserRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,21 +68,25 @@ public class EWalletService {
     }
 
     private BigDecimal creditAndReturnBalance(long userId, BigDecimal amount) {
-        return (BigDecimal) em.createNativeQuery("""
-            UPDATE users
-            SET balance = balance + :amount
-            WHERE id = :userId
-            RETURNING balance
-        """)
+        BigDecimal balance = (BigDecimal) em.createNativeQuery("""
+        UPDATE users
+        SET balance = balance + :amount
+        WHERE id = :userId
+        RETURNING balance
+    """)
                 .setParameter("userId", userId)
                 .setParameter("amount", amount)
                 .getSingleResult();
+
+        em.flush();
+        em.clear();
+
+        return balance;
     }
 
-    @Transactional
     public BigDecimal debitAndReturnBalance(long userId, BigDecimal amount) {
         try {
-            return (BigDecimal) em.createNativeQuery("""
+            BigDecimal balance = (BigDecimal) em.createNativeQuery("""
             UPDATE users
             SET balance = balance - :amount
             WHERE id = :userId
@@ -91,7 +96,12 @@ public class EWalletService {
                     .setParameter("userId", userId)
                     .setParameter("amount", amount)
                     .getSingleResult();
-        } catch (jakarta.persistence.NoResultException e) {
+
+            em.flush();
+            em.clear();
+
+            return balance;
+        } catch (NoResultException e) {
             return null;
         }
     }
